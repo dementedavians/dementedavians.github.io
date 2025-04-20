@@ -626,13 +626,6 @@
                                 <p class="purple-text">- Web Developers</p>
                                 <p>> Visit our GitHub: <a href="https://github.com/dementedavians" target="_blank" style="color: var(--neon-blue);">github.com/dementedavians</a></p>
                             `;
-                        } else if (command === 'repos') {
-                            output.innerHTML = `
-                                <p>> Loading repositories...</p>
-                            `;
-                            terminalBody.appendChild(output);
-                            loadRepos();
-                            return;
                         } else if (command === 'contact') {
                             output.innerHTML = `
                                 <p>> Contact options:</p>
