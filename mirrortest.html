@@ -1,0 +1,128 @@
+<html>
+<head>
+    <title>Infinite Mirror</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            color: white;
+            font-family: monospace;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        iframe {
+            border: none;
+            transform-origin: center center;
+            transition: all 0.3s;
+        }
+        
+        .glitch-text {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        .distortion-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(255, 0, 0, 0.1),
+                rgba(0, 255, 0, 0.1),
+                rgba(0, 0, 255, 0.1)
+            );
+            pointer-events: none;
+            opacity: 0;
+            mix-blend-mode: overlay;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="glitch-text">RECURSION DEPTH: <span id="depth">0</span></div>
+        <div class="distortion-overlay" id="overlay"></div>
+        <iframe id="mirror" src="about:blank"></iframe>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentDepth = parseInt(urlParams.get('depth')) || 0;
+        
+        document.getElementById('depth').textContent = currentDepth;
+        
+        const iframe = document.getElementById('mirror');
+        const overlay = document.getElementById('overlay');
+        
+        const scaleFactor = 0.9;
+        const newWidth = window.innerWidth * scaleFactor;
+        const newHeight = window.innerHeight * scaleFactor;
+        
+        let distortions = '';
+        
+        const hueRotate = currentDepth * 5 % 360;
+        distortions += `hue-rotate(${hueRotate}deg) `;
+        
+        const rotate = Math.sin(currentDepth * 0.3) * 3;
+        distortions += `rotate(${rotate}deg) `;
+        
+        distortions += `scale(${scaleFactor})`;
+        
+        iframe.style.transform = distortions;
+        
+        if (currentDepth > 3) {
+            overlay.style.opacity = (currentDepth * 0.05);
+            if (currentDepth % 5 === 0) {
+                iframe.style.filter = `blur(${Math.min(1, currentDepth * 0.1)}px)`;
+            }
+        }
+        
+        const nextDepth = currentDepth + 1;
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Infinite Mirror - Level ${nextDepth}</title>
+                <style>${document.querySelector('style').innerHTML}</style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="glitch-text">RECURSION DEPTH: <span id="depth">${nextDepth}</span></div>
+                    <div class="distortion-overlay" id="overlay"></div>
+                    <iframe id="mirror" src="?depth=${nextDepth}"></iframe>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        iframe.onload = function() {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(html);
+            iframeDoc.close();
+        };
+        
+        iframe.src = 'about:blank';
+    </script>
+</body>
+</html>
